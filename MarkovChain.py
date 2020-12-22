@@ -156,7 +156,7 @@ class MarkovChain:
 		sequence = MarkovChain.obtainStart(self)
 		#print(sequence)
 
-		while (len(sequence) <= length and sequence[len(sequence) - 1] != ""):
+		while (len(sequence) < length and sequence[len(sequence) - 1] != ""):
 			sequence.append(MarkovChain.sampleNextToken(self, sequence[len(sequence) - 2] + " " + sequence[len(sequence) - 1], 0.1, 0.01))
 
 		result = ""
