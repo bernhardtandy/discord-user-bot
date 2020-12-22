@@ -4,6 +4,7 @@ from os import path
 import discord
 from dotenv import load_dotenv
 from MarkovChain import MarkovChain
+import boto3
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -13,10 +14,21 @@ client = discord.Client(intents=intents)
 
 markovChainsDict = {}
 
+s3 = boto3.resource('s3')
+
 @client.event
 async def on_ready():
 	for guild in client.guilds:
-		print(f'{client.user} is connected to {guild.name}')
+		print(f'{client.user} is connected to {guild.name}\n')
+		s3.Bucket('discorduserbot').download_file(Key="bot_data_" + guild.name + ".txt", Filename="bot_data_" + guild.name + ".txt")
+		if (path.exists("bot_data_" + guild.name + ".txt")):
+			markovChainsDict[guild.name] = MarkovChain("bot_data_" + guild.name + ".txt")
+		else:
+			file = open("bot_data_" + guild.name + ".txt", "w")
+			file.write(str(0) + "\n" + str(0) + "\n" + str(0))
+			file.close()
+			markovChainsDict[guild.name] = MarkovChain("bot_data_" + guild.name + ".txt")
+	print(markovChainsDict)
 
 @client.event
 async def on_message(message):
@@ -30,6 +42,7 @@ async def on_message(message):
 		markovChainsDict[message.guild.name].incrementMessageCount()
 		markovChainsDict[message.guild.name].updateModel(message.content)
 		markovChainsDict[message.guild.name].saveToFile("bot_data_" + message.guild.name + ".txt")
+		s3.Bucket('discorduserbot').put_object(Key="bot_data_" + message.guild.name + ".txt", Body="bot_data_" + message.guild.name + ".txt")
 
 	if (message.content.startswith("!speak")):
 		if (len(message.content.split()) > 1 and int(message.content.split()[1]) > 3):
