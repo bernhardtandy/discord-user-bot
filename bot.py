@@ -42,7 +42,7 @@ async def on_message(message):
 		markovChainsDict[message.guild.name].incrementMessageCount()
 		markovChainsDict[message.guild.name].updateModel(message.content)
 		markovChainsDict[message.guild.name].saveToFile("bot_data_" + message.guild.name + ".txt")
-		s3.Bucket('discorduserbot').put_object(Key="bot_data_" + message.guild.name + ".txt", Body="bot_data_" + message.guild.name + ".txt")
+		s3.Bucket('discorduserbot').upload_file(Key="bot_data_" + message.guild.name + ".txt", Filename="bot_data_" + message.guild.name + ".txt")
 
 	if (message.content.startswith("!speak")):
 		if (len(message.content.split()) > 1 and int(message.content.split()[1]) > 3):
