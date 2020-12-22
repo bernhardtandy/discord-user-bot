@@ -133,26 +133,31 @@ class MarkovChain:
 			return string.split()
 		
 
-	def sampleNextToken(self, seq, alpha):
-		if (seq in self.seq_to_index_i.keys()):
-			i = self.seq_to_index_i[seq]
-			probabilities = MarkovChain.getProbabilitiesFromOccurences(self, self.matrix[i])
-			j = np.random.choice(self.columns, 1, p=probabilities)
-			return self.index_j_to_token[j[0]]
-		else:
-			p = random.uniform(0, 1)
-			if (p > alpha):
-				return ""
-			else:
-				j = np.random.choice(self.columns, 1)
+	def sampleNextToken(self, seq, alpha, beta):
+		n = random.uniform(0, 1)
+		if (n > beta):
+			if (seq in self.seq_to_index_i.keys()):
+				i = self.seq_to_index_i[seq]
+				probabilities = MarkovChain.getProbabilitiesFromOccurences(self, self.matrix[i])
+				j = np.random.choice(self.columns, 1, p=probabilities)
 				return self.index_j_to_token[j[0]]
+			else:
+				p = random.uniform(0, 1)
+				if (p > alpha):
+					return ""
+				else:
+					j = np.random.choice(self.columns, 1)
+					return self.index_j_to_token[j[0]]
+		else:
+			j = np.random.choice(self.columns, 1)
+			return self.index_j_to_token[j[0]]
 
 	def constructSequence(self, length):
 		sequence = MarkovChain.obtainStart(self)
 		#print(sequence)
 
 		while (len(sequence) <= length and sequence[len(sequence) - 1] != ""):
-			sequence.append(MarkovChain.sampleNextToken(self, sequence[len(sequence) - 2] + " " + sequence[len(sequence) - 1], 0.1))
+			sequence.append(MarkovChain.sampleNextToken(self, sequence[len(sequence) - 2] + " " + sequence[len(sequence) - 1], 0.1, 0.01))
 
 		result = ""
 		for i in range(len(sequence)):
