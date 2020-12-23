@@ -44,7 +44,7 @@ async def on_message(message):
 		markovChainsDict[message.guild.name].saveToFile("bot_data_" + message.guild.name + ".txt")
 		s3.Bucket('discorduserbot').upload_file(Key="bot_data_" + message.guild.name + ".txt", Filename="bot_data_" + message.guild.name + ".txt")
 
-	if (message.content.startswith("!help")):
+	if (message.content.startswith("!dubhelp")):
 		response = "!speak <max_length> - DUB sends a message with up to <max_length> words (default 100) \n"
 		response += "!frequency <number> - DUB will !speak in a channel every <number> messages (default 20, minimum 1, use -1 to stop bot from automatically speaking)" 
 		await message.channel.send(response)
