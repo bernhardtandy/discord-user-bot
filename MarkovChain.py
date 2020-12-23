@@ -116,7 +116,7 @@ class MarkovChain:
 				file.write(str(self.matrix[i][j]) + " ")
 			file.write("\n")
 
-		file.write(str(self.messageCount))
+		file.write(str(self.messageCount) + "\n")
 		file.write(str(self.speakFrequency))
 
 		file.close()
