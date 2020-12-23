@@ -38,6 +38,7 @@ class MarkovChain:
 				self.matrix[i][j] = data[j]
 
 		self.messageCount = int(file.readline())
+		self.speakFrequency = int(file.readline())
 
 		file.close()
 
@@ -49,6 +50,12 @@ class MarkovChain:
 
 	def getMessageCount(self):
 		return self.messageCount
+
+	def setSpeakFrequency(self, newFreq):
+		self.speakFrequency = newFreq
+
+	def getSpeakFrequency(self):
+		return self.speakFrequency
 
 	def updateModel(self, line):
 		data = line.split()
@@ -110,6 +117,7 @@ class MarkovChain:
 			file.write("\n")
 
 		file.write(str(self.messageCount))
+		file.write(str(self.speakFrequency))
 
 		file.close()
 
@@ -162,4 +170,6 @@ class MarkovChain:
 		result = ""
 		for i in range(len(sequence)):
 			result += sequence[i] + " "
-		return result
+		if ("@" in result):
+			return constructSequence(self, length)
+		else: return result
