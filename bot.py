@@ -24,10 +24,10 @@ async def file_upload_task():
 		try: 
 			for key in markovChainsDict.keys():
 				s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
-			await asyncio.sleep(30)
+			await asyncio.sleep(18000)
 		except Exception as e:
 			print(str(e))
-			await asyncio.sleep(30)
+			await asyncio.sleep(18000)
 
 
 @client.event
@@ -56,7 +56,6 @@ async def on_message(message):
 		markovChainsDict[message.guild.name].incrementMessageCount()
 		markovChainsDict[message.guild.name].updateModel(message.content)
 		markovChainsDict[message.guild.name].saveToFile("bot_data_" + message.guild.name + ".txt")
-		#s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + message.guild.name + ".txt", Filename="bot_data_" + message.guild.name + ".txt")
 
 	if (message.content.startswith("!dubhelp")):
 		response = "!speak <max_length> - DUB sends a message with up to <max_length> words (default 100) \n"
@@ -80,11 +79,6 @@ async def on_message(message):
 		response = markovChainsDict[message.guild.name].constructSequence(100)
 
 		await message.channel.send(response)
-
-# @client.event
-# async def on_disconnect():
-# 	for key in markovChainsDict.keys():
-# 		s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
 
 client.loop.create_task(file_upload_task())
 client.run(TOKEN)
