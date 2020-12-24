@@ -20,7 +20,7 @@ s3 = boto3.resource('s3')
 async def on_ready():
 	for guild in client.guilds:
 		print(f'{client.user} is connected to {guild.name}\n')
-		s3.Bucket('discorduserbot').download_file(Key="bot_data_" + guild.name + ".txt", Filename="bot_data_" + guild.name + ".txt")
+		s3.Bucket('discorduserbot2').download_file(Key="bot_data_" + guild.name + ".txt", Filename="bot_data_" + guild.name + ".txt")
 		if (path.exists("bot_data_" + guild.name + ".txt")):
 			markovChainsDict[guild.name] = MarkovChain("bot_data_" + guild.name + ".txt")
 		else:
@@ -42,7 +42,7 @@ async def on_message(message):
 		markovChainsDict[message.guild.name].incrementMessageCount()
 		markovChainsDict[message.guild.name].updateModel(message.content)
 		markovChainsDict[message.guild.name].saveToFile("bot_data_" + message.guild.name + ".txt")
-		s3.Bucket('discorduserbot').upload_file(Key="bot_data_" + message.guild.name + ".txt", Filename="bot_data_" + message.guild.name + ".txt")
+		#s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + message.guild.name + ".txt", Filename="bot_data_" + message.guild.name + ".txt")
 
 	if (message.content.startswith("!dubhelp")):
 		response = "!speak <max_length> - DUB sends a message with up to <max_length> words (default 100) \n"
@@ -61,11 +61,15 @@ async def on_message(message):
 		else: response = markovChainsDict[message.guild.name].constructSequence(100)
 
 		await message.channel.send(response)
-		return
 
-	if (markovChainsDict[message.guild.name].getSpeakFrequency() > 0 and markovChainsDict[message.guild.name].getMessageCount() % markovChainsDict[message.guild.name].getSpeakFrequency() == 0):
+	elif (markovChainsDict[message.guild.name].getSpeakFrequency() > 0 and markovChainsDict[message.guild.name].getMessageCount() % markovChainsDict[message.guild.name].getSpeakFrequency() == 0):
 		response = markovChainsDict[message.guild.name].constructSequence(100)
 
 		await message.channel.send(response)
+
+@client.event
+async def on_disconnect():
+	for guild in client.guilds:
+		s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + message.guild.name + ".txt", Filename="bot_data_" + message.guild.name + ".txt")
 
 client.run(TOKEN)
