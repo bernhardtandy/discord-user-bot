@@ -2,5 +2,4 @@ discord.py
 python-dotenv
 numpy
 boto3
-time
 asyncio
