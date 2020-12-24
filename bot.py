@@ -24,10 +24,10 @@ async def file_upload_task():
 		try: 
 			for key in markovChainsDict.keys():
 				s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
-			await asyncio.sleep(60)
+			await asyncio.sleep(30)
 		except Exception as e:
 			print(str(e))
-			await asyncio.sleep(60)
+			await asyncio.sleep(30)
 
 
 @client.event
@@ -43,7 +43,6 @@ async def on_ready():
 			file.close()
 			markovChainsDict[guild.name] = MarkovChain("bot_data_" + guild.name + ".txt")
 	print(markovChainsDict)
-	client.loop.create_task(file_upload_task())
 
 @client.event
 async def on_message(message):
@@ -87,4 +86,5 @@ async def on_message(message):
 # 	for key in markovChainsDict.keys():
 # 		s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
 
+client.loop.create_task(file_upload_task())
 client.run(TOKEN)
