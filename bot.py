@@ -5,6 +5,8 @@ import discord
 from dotenv import load_dotenv
 from MarkovChain import MarkovChain
 import boto3
+import time
+import asyncio
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -15,6 +17,18 @@ client = discord.Client(intents=intents)
 markovChainsDict = {}
 
 s3 = boto3.resource('s3')
+
+async def file_upload_task():
+	await client.wait_until_ready()
+	while client.is_ready():
+		try: 
+			for key in markovChainsDict.keys():
+				s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
+			await asyncio.sleep(60)
+		except Exception as e:
+			print(str(e))
+			await asyncio.sleep(60)
+
 
 @client.event
 async def on_ready():
@@ -29,6 +43,7 @@ async def on_ready():
 			file.close()
 			markovChainsDict[guild.name] = MarkovChain("bot_data_" + guild.name + ".txt")
 	print(markovChainsDict)
+	client.loop.create_task(file_upload_task())
 
 @client.event
 async def on_message(message):
@@ -53,7 +68,7 @@ async def on_message(message):
 	if (message.content.startswith("!frequency")):
 		if (len(message.content.split()) > 1 and (int(message.content.split()[1]) > 0 or int(message.content.split()[1]) == -1)):
 			markovChainsDict[message.guild.name].setSpeakFrequency(int(message.content.split()[1]))
-		return
+		
 
 	if (message.content.startswith("!speak")):
 		if (len(message.content.split()) > 1 and int(message.content.split()[1]) > 3):
@@ -67,9 +82,9 @@ async def on_message(message):
 
 		await message.channel.send(response)
 
-@client.event
-async def on_disconnect():
-	for key in markovChainsDict.keys():
-		s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
+# @client.event
+# async def on_disconnect():
+# 	for key in markovChainsDict.keys():
+# 		s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
 
 client.run(TOKEN)
