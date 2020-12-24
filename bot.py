@@ -69,7 +69,7 @@ async def on_message(message):
 
 @client.event
 async def on_disconnect():
-	for guild in client.guilds:
-		s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + message.guild.name + ".txt", Filename="bot_data_" + message.guild.name + ".txt")
+	for key in markovChainsDict.keys():
+		s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
 
 client.run(TOKEN)
