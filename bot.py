@@ -7,7 +7,7 @@ from MarkovChain import MarkovChain
 import boto3
 import time
 import asyncio
-import lz4
+import lz4.frame
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
