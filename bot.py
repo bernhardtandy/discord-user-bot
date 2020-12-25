@@ -37,6 +37,7 @@ async def file_upload_task():
 					with lz4.frame.open("bot_data_" + key + "_compressed", mode="w") as file:
 						file.write(compressed)
 
+					print("Successfully compressed bot_data_" + key + ".txt")
 					s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + "_compressed", Filename="bot_data_" + key + "_compressed")
 
 			await asyncio.sleep(21600)
