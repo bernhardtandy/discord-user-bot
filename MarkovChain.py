@@ -171,5 +171,5 @@ class MarkovChain:
 		for i in range(len(sequence)):
 			result += sequence[i] + " "
 		if ("@" in result):
-			return constructSequence(self, length)
+			return MarkovChain.constructSequence(self, length)
 		else: return result

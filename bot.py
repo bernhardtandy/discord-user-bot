@@ -50,17 +50,18 @@ async def on_ready():
 	for guild in client.guilds:
 		print(f'{client.user} is connected to {guild.name}\n')
 		if (not(path.exists("bot_data_" + guild.name + ".txt"))):
-			s3.Bucket('discorduserbot2').download_file(Key="bot_data_" + guild.name + ".txt", Filename="bot_data_" + guild.name + ".txt")
-			# s3.Bucket('discorduserbot2').download_file(Key="bot_data_" + guild.name + "_compressed", Filename="bot_data_" + guild.name + "_compressed")
+			# s3.Bucket('discorduserbot2').download_file(Key="bot_data_" + guild.name + ".txt", Filename="bot_data_" + guild.name + ".txt")
+			s3.Bucket('discorduserbot2').download_file(Key="bot_data_" + guild.name + "_compressed", Filename="bot_data_" + guild.name + "_compressed")
 
-			# with lz4.frame.open("bot_data_" + guild.name + "_compressed", mode="r") as file:
-			# 	compressed = file.read()
-			# decompressed = lz4.frame.decompress(compressed)
-			# decoded_data = decompressed.decode("utf-8")
+			with lz4.frame.open("bot_data_" + guild.name + "_compressed", mode="r") as file:
+				compressed = file.read()
+			decompressed = lz4.frame.decompress(compressed)
+			decoded_data = decompressed.decode("utf-8")
 
-			# data_file = open("bot_data_" + guild.name + ".txt", "w")
-			# data_file.write(decoded_data)
-			# data_file.close()
+			data_file = open("bot_data_" + guild.name + ".txt", "w")
+			data_file.write(decoded_data)
+			data_file.close()
+			print("Successfully decompressed bot_data_" + guild.name + ".txt")
 
 		if (path.exists("bot_data_" + guild.name + ".txt")):
 			markovChainsDict[guild.name] = MarkovChain("bot_data_" + guild.name + ".txt")
