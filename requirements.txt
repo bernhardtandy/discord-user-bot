@@ -3,3 +3,4 @@ python-dotenv
 numpy
 boto3
 asyncio
+lz4

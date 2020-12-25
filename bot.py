@@ -7,6 +7,7 @@ from MarkovChain import MarkovChain
 import boto3
 import time
 import asyncio
+import lz4
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -23,26 +24,53 @@ async def file_upload_task():
 	while client.is_ready():
 		try: 
 			for key in markovChainsDict.keys():
-				s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
-			await asyncio.sleep(18000)
+				if (path.exists("bot_data_" + key + ".txt")):
+					# s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + ".txt", Filename="bot_data_" + key + ".txt")
+
+					data_file = open("bot_data_" + key + ".txt", "r")
+					data_string = data_file.read()
+					data_file.close()
+
+					encoded_data = data_string.encode("utf-8")
+					compressed = lz4.frame.compress(encoded_data)
+
+					with lz4.frame.open("bot_data_" + key + "_compressed", mode="w") as file:
+						file.write(compressed)
+
+					s3.Bucket('discorduserbot2').upload_file(Key="bot_data_" + key + "_compressed", Filename="bot_data_" + key + "_compressed")
+
+			await asyncio.sleep(21600)
 		except Exception as e:
 			print(str(e))
-			await asyncio.sleep(18000)
+			await asyncio.sleep(21600)
 
 
 @client.event
 async def on_ready():
 	for guild in client.guilds:
 		print(f'{client.user} is connected to {guild.name}\n')
-		s3.Bucket('discorduserbot2').download_file(Key="bot_data_" + guild.name + ".txt", Filename="bot_data_" + guild.name + ".txt")
+		if (not(path.exists("bot_data_" + guild.name + ".txt"))):
+			# s3.Bucket('discorduserbot2').download_file(Key="bot_data_" + guild.name + ".txt", Filename="bot_data_" + guild.name + ".txt")
+			s3.Bucket('discorduserbot2').download_file(Key="bot_data_" + guild.name + "_compressed", Filename="bot_data_" + guild.name + "_compressed")
+
+			with lz4.frame.open("bot_data_" + guild.name + "_compressed", mode="r") as file:
+				compressed = file.read()
+			decompressed = lz4.frame.decompress(compressed)
+			decoded_data = decompressed.decode("utf-8")
+
+			data_file = open("bot_data_" + guild.name + ".txt", "w")
+			data_file.write(decoded_data)
+			data_file.close()
+
 		if (path.exists("bot_data_" + guild.name + ".txt")):
 			markovChainsDict[guild.name] = MarkovChain("bot_data_" + guild.name + ".txt")
 		else:
 			file = open("bot_data_" + guild.name + ".txt", "w")
-			file.write(str(0) + "\n" + str(0) + "\n" + str(0))
+			file.write(str(0) + "\n" + str(0) + "\n" + str(0) + "\n" + str(20))
 			file.close()
 			markovChainsDict[guild.name] = MarkovChain("bot_data_" + guild.name + ".txt")
 	print(markovChainsDict)
+
 
 @client.event
 async def on_message(message):
@@ -79,6 +107,7 @@ async def on_message(message):
 		response = markovChainsDict[message.guild.name].constructSequence(100)
 
 		await message.channel.send(response)
+		
 
 client.loop.create_task(file_upload_task())
 client.run(TOKEN)
